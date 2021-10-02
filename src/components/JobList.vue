@@ -2,7 +2,7 @@
 	<div class="job-list">
     <p>Ordered by {{order}}</p>
 		<ul>
-			<li :key="job.id" v-for="job in jobs">
+			<li :key="job.id" v-for="job in orderedJobs">
 				<h2>{{ job.title }} - {{ job.location }}</h2>
 				<div class="salary">
 					<p>{{ job.salary }} rupees</p>
@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { computed, defineComponent, PropType } from "vue";
 import Job from "@/types/Job";
 import OrderTerm from "@/types/OrderTerm";
 
@@ -31,10 +31,24 @@ export default defineComponent({
 			type: Array as PropType<Job[]>,
 		},
     order: {
-      require: true,
+      required: true,
       type: String as PropType<OrderTerm>
     }
-	}
+	},
+  setup(props) {
+    //in order to access the jobs we need to pass the props into setup
+    const orderedJobs = computed(() => {
+    //sort will fire a function for each consecutive pair of elements inside the array (a,b)
+    //if we return -1 for this pair then the order of that pair will remain the same
+    //if we return +1 it switches the order, we will do this to all items in our array until it matches our criteria
+      return [...props.jobs].sort((a: Job, b: Job) => {
+        //we are comparing the order property of a & b
+        //if a is bigger than b we want to return +1
+        return a[props.order] > b[props.order] ? 1 : -1
+      })
+    })
+    return { orderedJobs }
+  },
 });
 </script>
 
